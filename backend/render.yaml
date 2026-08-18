@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: whiteboard-action-plan-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # Set these as secret env vars in the Render dashboard (not in this file).
+    envVars:
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: ap-south-1
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      # Comma-separated list of allowed frontend origins.
+      # e.g. https://your-app.vercel.app
+      - key: ALLOWED_ORIGINS
+        sync: false
