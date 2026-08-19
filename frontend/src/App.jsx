@@ -39,6 +39,13 @@ function blankTask() {
   return { title: '', owner: '', due: '', priority: '', context: '' }
 }
 
+// Estimate textarea height so long task text is fully visible (not clipped).
+function autoRows(text, charsPerRow = 40) {
+  const lines = String(text || '').split('\n').length
+  const wrapped = Math.ceil(String(text || '').length / charsPerRow)
+  return Math.max(2, Math.min(lines + wrapped, 12))
+}
+
 function buildMarkdown(plan) {
   const rows = plan.tasks
     .map(
@@ -427,7 +434,7 @@ function App() {
                           className="cell-textarea"
                           value={t.title}
                           onChange={(e) => updateTask(i, 'title', e.target.value)}
-                          rows={2}
+                          rows={autoRows(t.title)}
                         />
                       </td>
                       <td>
@@ -462,7 +469,7 @@ function App() {
                           className="cell-textarea"
                           value={t.context}
                           onChange={(e) => updateTask(i, 'context', e.target.value)}
-                          rows={2}
+                          rows={autoRows(t.context)}
                         />
                       </td>
                       <td>
