@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 async function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -80,6 +80,11 @@ function App() {
   const [plan, setPlan] = useState(null)
   const [toast, setToast] = useState(null)
   const [trace, setTrace] = useState([])
+  const reviewRef = useRef(null)
+
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+  const scrollToReview = () =>
+    reviewRef.current && reviewRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   const handleFile = async (file) => {
     if (!file) return
@@ -149,6 +154,7 @@ function App() {
     setPlan(null)
     setFailedStep(null)
     setLoading(true)
+    scrollTop()
     addTrace('Extracting action items...')
     try {
       const res = await postJSON(`${API_BASE}/api/extract-items`, {
@@ -218,6 +224,7 @@ function App() {
       const taskCount = (planRes.tasks || []).length
       const qCount = (planRes.open_questions || []).length
       addTrace(`Generated ${taskCount} task${taskCount === 1 ? '' : 's'}, ${qCount} open question${qCount === 1 ? '' : 's'}`)
+      setTimeout(scrollToReview, 150)
     } catch (err) {
       setFailedStep('synthesize')
       setError(`Synthesis failed: ${err.message}`)
@@ -381,7 +388,7 @@ function App() {
       )}
 
       {stage === 'extract' && plan && (
-        <div className="card">
+        <div className="card" ref={reviewRef}>
           <h2>Review &amp; export</h2>
 
           <div className="field">
@@ -416,9 +423,11 @@ function App() {
                   {plan.tasks.map((t, i) => (
                     <tr key={i}>
                       <td>
-                        <input
+                        <textarea
+                          className="cell-textarea"
                           value={t.title}
                           onChange={(e) => updateTask(i, 'title', e.target.value)}
+                          rows={2}
                         />
                       </td>
                       <td>
@@ -449,9 +458,11 @@ function App() {
                         </span>
                       </td>
                       <td>
-                        <input
+                        <textarea
+                          className="cell-textarea"
                           value={t.context}
                           onChange={(e) => updateTask(i, 'context', e.target.value)}
+                          rows={2}
                         />
                       </td>
                       <td>
